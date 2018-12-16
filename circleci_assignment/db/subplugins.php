@@ -1,3 +1,3 @@
 <?php
 
-$subplugins = array('assignment'=>'mod/assignment/type');
+$subplugins = array('circleci_assignment'=>'mod/assignment/type');
