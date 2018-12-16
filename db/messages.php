@@ -3,14 +3,10 @@
  * Defines message providers (types of messages being sent)
  *
  * @package   mod_circleci_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright 2018 Anatolii Stehnii
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$messageproviders = array (
+defined('MOODLE_INTERNAL') || die();
 
-    // Ordinary assignment submissions.
-    'circleci_assign_notification' => array(
-    )
-
-);
+require_once($CFG->dirroot . '/mod/assign/db/messages.php');

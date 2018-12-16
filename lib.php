@@ -1,28 +1,31 @@
 <?php
 /**
- * This file contains the moodle hooks for the assign module.
+ * This file contains the moodle hooks for the circle CI assign module.
  *
- * It delegates most functions to the assignment class.
+ * It reuses most functions from the assign module
  *
  * @package   mod_circleci_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @copyright 2018 Anatolii Stehnii
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot . '/mod/assign/lib.php');
+require_once($CFG->dirroot . '/mod/circleci_assign/mod_form.php');
 
 /**
  * Adds an assignment instance
  *
  * This is done by calling the add_instance() method of the assignment type class
  * @param stdClass $data
- * @param mod_assign_mod_form $form
+ * @param mod_circleci_assign_mod_form $form
  * @return int The instance id of the new assignment
  */
-function circleci_assign_add_instance(stdClass $data, mod_assign_mod_form $form = null) {
+function circleci_assign_add_instance(stdClass $data, mod_circleci_assign_mod_form $form = null) {
     global $CFG;
     require_once($CFG->dirroot . '/mod/circleci_assign/locallib.php');
 
-    $assignment = new assign(context_module::instance($data->coursemodule), null, null);
+    $assignment = new circleci_assign(context_module::instance($data->coursemodule), null, null);
     return $assignment->add_instance($data, true);
 }
 
@@ -32,13 +35,7 @@ function circleci_assign_add_instance(stdClass $data, mod_assign_mod_form $form 
  * @return bool
  */
 function circleci_assign_delete_instance($id) {
-    global $CFG;
-    require_once($CFG->dirroot . '/mod/circleci_assign/locallib.php');
-    $cm = get_coursemodule_from_instance('circleci_assign', $id, 0, false, MUST_EXIST);
-    $context = context_module::instance($cm->id);
-
-    $assignment = new assign($context, null, null);
-    return $assignment->delete_instance();
+    return assign_delete_instance($id);
 }
 
 /**
@@ -50,26 +47,7 @@ function circleci_assign_delete_instance($id) {
  * @return array
  */
 function circleci_assign_reset_userdata($data) {
-    global $CFG, $DB;
-    require_once($CFG->dirroot . '/mod/circleci_assign/locallib.php');
-
-    $status = array();
-    $params = array('courseid'=>$data->courseid);
-    $sql = "SELECT a.id FROM {circleci_assign} a WHERE a.course=:courseid";
-    $course = $DB->get_record('course', array('id'=>$data->courseid), '*', MUST_EXIST);
-    if ($assigns = $DB->get_records_sql($sql, $params)) {
-        foreach ($assigns as $assign) {
-            $cm = get_coursemodule_from_instance('assign',
-                                                 $assign->id,
-                                                 $data->courseid,
-                                                 false,
-                                                 MUST_EXIST);
-            $context = context_module::instance($cm->id);
-            $assignment = new assign($context, $cm, $course);
-            $status = array_merge($status, $assignment->reset_userdata($data));
-        }
-    }
-    return $status;
+    return assign_reset_userdata($data);
 }
 
 /**
@@ -83,49 +61,8 @@ function circleci_assign_reset_userdata($data) {
  * @param int|stdClass $cm Course module object or ID (not used in this module).
  * @return bool
  */
-function assign_refresh_events($courseid = 0, $instance = null, $cm = null) {
-    global $CFG, $DB;
-    require_once($CFG->dirroot . '/mod/assign/locallib.php');
-
-    // If we have instance information then we can just update the one event instead of updating all events.
-    if (isset($instance)) {
-        if (!is_object($instance)) {
-            $instance = $DB->get_record('assign', array('id' => $instance), '*', MUST_EXIST);
-        }
-        if (isset($cm)) {
-            if (!is_object($cm)) {
-                assign_prepare_update_events($instance);
-                return true;
-            } else {
-                $course = get_course($instance->course);
-                assign_prepare_update_events($instance, $course, $cm);
-                return true;
-            }
-        }
-    }
-
-    if ($courseid) {
-        // Make sure that the course id is numeric.
-        if (!is_numeric($courseid)) {
-            return false;
-        }
-        if (!$assigns = $DB->get_records('assign', array('course' => $courseid))) {
-            return false;
-        }
-        // Get course from courseid parameter.
-        if (!$course = $DB->get_record('course', array('id' => $courseid), '*')) {
-            return false;
-        }
-    } else {
-        if (!$assigns = $DB->get_records('assign')) {
-            return false;
-        }
-    }
-    foreach ($assigns as $assign) {
-        assign_prepare_update_events($assign);
-    }
-
-    return true;
+function circleci_assign_refresh_events($courseid = 0, $instance = null, $cm = null) {
+    return assign_refresh_events($courseid, $instance, $cm);
 }
 
 /**
@@ -135,29 +72,11 @@ function assign_refresh_events($courseid = 0, $instance = null, $cm = null) {
  * @param  stdClass $course Course object.
  * @param  stdClass $cm Course module object.
  */
-function assign_prepare_update_events($assign, $course = null, $cm = null) {
-    global $DB;
-    if (!isset($course)) {
-        // Get course and course module for the assignment.
-        list($course, $cm) = get_course_and_cm_from_instance($assign->id, 'assign', $assign->course);
-    }
-    // Refresh the assignment's calendar events.
-    $context = context_module::instance($cm->id);
-    $assignment = new assign($context, $cm, $course);
-    $assignment->update_calendar($cm->id);
-    // Refresh the calendar events also for the assignment overrides.
-    $overrides = $DB->get_records('assign_overrides', ['assignid' => $assign->id], '',
-                                  'id, groupid, userid, duedate, sortorder');
-    foreach ($overrides as $override) {
-        if (empty($override->userid)) {
-            unset($override->userid);
-        }
-        if (empty($override->groupid)) {
-            unset($override->groupid);
-        }
-        assign_update_events($assignment, $override);
-    }
+function circleci_assign_prepare_update_events($assign, $course = null, $cm = null) {
+    return assign_prepare_update_events($assign, $course, $cm);
 }
+
+// TODO: rename all functions below with circle_assign and replace their context with proxy to assign function  
 
 /**
  * Removes all grades from gradebook
