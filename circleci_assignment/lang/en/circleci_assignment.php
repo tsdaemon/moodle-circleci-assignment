@@ -23,12 +23,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['assignment:addinstance'] = 'Add a new assignment';
+$string['assignment:addinstance'] = 'Add a new CircleCI assignment';
 $string['assignment:exportownsubmission'] = 'Export own submission';
 $string['assignment:exportsubmission'] = 'Export submission';
-$string['assignment:grade'] = 'Grade assignment';
-$string['assignment:submit'] = 'Submit assignment';
-$string['assignment:view'] = 'View assignment';
+$string['assignment:grade'] = 'Grade CircleCI assignment';
+$string['assignment:submit'] = 'Submit CircleCI assignment';
+$string['assignment:view'] = 'View CircleCI assignment';
 $string['assignmentneedsupgrade'] = 'The legacy "Assignment 2.2" activity has been disabled. Please request that your site administrator runs the assignment upgrade tool for all legacy assignments in this site.';
 $string['messageprovider:assignment_updates'] = 'Assignment (2.2) notifications';
 $string['assignmentdisabled'] = 'The legacy "Assignment 2.2" activity is disabled.';

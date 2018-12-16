@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
 
-    'mod/assignment:view' => array(
+    'mod/circleci_assignment:view' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -39,7 +39,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/assignment:addinstance' => array(
+    'mod/circleci_assignment:addinstance' => array(
         'riskbitmask' => RISK_XSS,
 
         'captype' => 'write',
@@ -51,7 +51,7 @@ $capabilities = array(
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
 
-    'mod/assignment:submit' => array(
+    'mod/circleci_assignment:submit' => array(
 
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -60,7 +60,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/assignment:grade' => array(
+    'mod/circleci_assignment:grade' => array(
         'riskbitmask' => RISK_XSS,
 
         'captype' => 'write',
@@ -72,7 +72,7 @@ $capabilities = array(
         )
     ),
 
-    'mod/assignment:exportownsubmission' => array(
+    'mod/circleci_assignment:exportownsubmission' => array(
 
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -84,5 +84,3 @@ $capabilities = array(
         )
     ),
 );
-
-
