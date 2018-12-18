@@ -9,3 +9,5 @@
 
 $string['circleci_url'] = 'CircleCI callback URL';
 $string['circleci_token'] = 'CircleCI API token';
+
+$string['modulename'] = 'CircleCI Assignment';

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/db" VERSION="20140724" COMMENT="XMLDB file for Moodle mod/circleci_assign"
+<XMLDB PATH="mod/circleciassign/db" VERSION="20140724" COMMENT="XMLDB file for Moodle mod/circleciassign"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="circleci_assign" COMMENT="This table saves additional information for assignmnent needed for CircleCI submission.">
+    <TABLE NAME="circleciassign" COMMENT="This table saves additional information for assignmnent needed for CircleCI submission.">
       <FIELDS>
         <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="circleci_url" TYPE="varchar" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="circleci_token" TYPE="varchar" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="circleci_url" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="circleci_token" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="assignment"/>
-        <KEY NAME="assign" TYPE="foreign" FIELDS="assign" REFTABLE="assign" REFFIELDS="id"/>
+        <KEY NAME="assign" TYPE="foreign" FIELDS="assignment" REFTABLE="assign" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="circleci_assign_submission" COMMENT="This table saves additional information about student submission related to CircleCI.">
+    <TABLE NAME="circleciassign_submission" COMMENT="This table saves additional information about student submission related to CircleCI.">
       <FIELDS>
         <FIELD NAME="assign_submission" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="circleci_job_url" TYPE="varchar" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="circleci_job_url" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="assign_submission"/>
