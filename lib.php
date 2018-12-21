@@ -9,7 +9,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
-
 require_once($CFG->dirroot . '/mod/assign/lib.php');
 
 /**
@@ -84,7 +83,7 @@ function circleciassign_prepare_update_events($assign, $course = null, $cm = nul
  * @param string $type Optional type of assignment to limit the reset to a particular assignment type
  */
 function circleciassign_reset_gradebook($courseid, $type='') {
-    return circleciassign_reset_gradebook($courseid, $type);
+    return assign_reset_gradebook($courseid, $type);
 }
 
 /**
