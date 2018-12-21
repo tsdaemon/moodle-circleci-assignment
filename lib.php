@@ -93,7 +93,7 @@ function circleciassign_reset_gradebook($courseid, $type='') {
  * @param moodleform $mform form passed by reference
  */
 function circleciassign_reset_course_form_definition(&$mform) {
-    return assign_reset_course_form_definition(&$mform);
+    return assign_reset_course_form_definition($mform);
 }
 
 /**
@@ -206,7 +206,7 @@ function circleciassign_page_type_list($pagetype, $parentcontext, $currentcontex
  * @return true
  */
 function circleciassign_print_overview($courses, &$htmlarray) {
-    return assign_print_overview($courses, &$htmlarray);
+    return assign_print_overview($courses, $htmlarray);
 }
 
 /**
@@ -225,7 +225,7 @@ function circleciassign_print_overview($courses, &$htmlarray) {
  */
 function circleciassign_get_mysubmission_details_for_print_overview(&$mysubmissions, $sqlassignmentids, $assignmentidparams,
                                                             $assignment) {
-	return assign_get_mysubmission_details_for_print_overview(&$mysubmissions, $sqlassignmentids, $assignmentidparams,
+	return assign_get_mysubmission_details_for_print_overview($mysubmissions, $sqlassignmentids, $assignmentidparams,
                                                             $assignment);
 }
 
@@ -246,7 +246,7 @@ function circleciassign_get_mysubmission_details_for_print_overview(&$mysubmissi
  */
 function circleciassign_get_grade_details_for_print_overview(&$unmarkedsubmissions, $sqlassignmentids, $assignmentidparams,
                                                      $assignment, $context) {
-	return assign_get_grade_details_for_print_overview(&$unmarkedsubmissions, $sqlassignmentids, $assignmentidparams,
+	return assign_get_grade_details_for_print_overview($unmarkedsubmissions, $sqlassignmentids, $assignmentidparams,
                                                      $assignment, $context);
 }
 
@@ -282,8 +282,8 @@ function circleciassign_get_recent_mod_activity(&$activities,
                                         $cmid,
                                         $userid=0,
                                         $groupid=0) {
-	return assign_get_recent_mod_activity(&$activities,
-                                        &$index,
+	return assign_get_recent_mod_activity($activities,
+                                        $index,
                                         $timestart,
                                         $courseid,
                                         $cmid,
@@ -523,11 +523,11 @@ function circleciassign_pluginfile($course,
                 array $options=array()) {
     return assign_pluginfile($course,
                 $cm,
-                context $context,
+                $context,
                 $filearea,
                 $args,
                 $forcedownload,
-                array $options=array());
+                $options);
     }
 
 /**
@@ -550,7 +550,7 @@ function circlecimod_assign_output_fragment_gradingpanel($args) {
  * @since Moodle 3.2
  */
 function circleciassign_check_updates_since(cm_info $cm, $from, $filter = array()) {
-	return assign_check_updates_since(cm_info $cm, $from, $filter);
+	return assign_check_updates_since($cm, $from, $filter);
 }
 
 /**
@@ -564,7 +564,7 @@ function circleciassign_check_updates_since(cm_info $cm, $from, $filter = array(
  * @return bool Returns true if the event is visible to the current user, false otherwise.
  */
 function circlecimod_assign_core_calendar_is_event_visible(calendar_event $event, $userid = 0) {
-    return mod_assign_core_calendar_is_event_visible(calendar_event $event, $userid);
+    return mod_assign_core_calendar_is_event_visible($event, $userid);
 }
 
 /**
