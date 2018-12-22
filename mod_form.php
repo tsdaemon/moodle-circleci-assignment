@@ -9,8 +9,7 @@
 
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
-require_once($CFG->dirroot . '/mod/assign/mod_form.php')
-require_once($CFG->dirroot . '/mod/circleciassign/locallib.php');
+require_once($CFG->dirroot . '/mod/assign/mod_form.php');
 
 /**
  * CircleCI assignment settings form.
