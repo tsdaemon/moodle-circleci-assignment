@@ -8,8 +8,18 @@
  */
 
  $string['allowcirclecisubmissions'] = 'Enabled';
+
  $string['default'] = 'Enabled by default';
  $string['default_help'] = 'If set, this submission method will be enabled by default for all new assignments.';
+
+ $string['aws_region'] = 'AWS region';
+ $string['aws_region_help'] = 'Information required for AWS submission upload.';
+ $string['aws_token'] = 'AWS token';
+ $string['aws_token_help'] = 'Information required for AWS submission upload.';
+ $string['aws_key'] = 'AWS key';
+ $string['aws_key_help'] = 'Information required for AWS submission upload.';
+ $string['aws_bucket'] = 'AWS bucket';
+ $string['aws_bucket_help'] = 'Information required for AWS submission upload.';
 
  $string['circleci'] = 'CircleCI submissions';
 

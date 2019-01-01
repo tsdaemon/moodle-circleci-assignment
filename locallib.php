@@ -96,6 +96,44 @@
    }
 
    /**
+    * Additionaly to file plugin code, store submission to AWS S3 and
+    * send request to CircleCI
+    *
+    * @param stdClass $submission
+    * @param stdClass $data
+    * @return bool
+    */
+   public function save(stdClass $submission, stdClass $data) {
+     $success = parent::save($submission, $data);
+     if($success) {
+       require 'vendor/autoload.php';
+
+       global $USER, $DB;
+       $fs = get_file_storage();
+
+       $files = $fs->get_area_files($this->assignment->get_context()->id,
+                                    'assignsubmission_file',
+                                    ASSIGNSUBMISSION_FILE_FILEAREA,
+                                    $submission->id,
+                                    'id',
+                                    false);
+        if(count($files) != 1) {
+          throw new Exception('Only a single file submission is supported');
+        }
+
+        $filename = $files[0]->get_filename();
+
+        use Aws\S3\S3Client;
+
+        // Instantiate an Amazon S3 client.
+        $s3 = new S3Client([
+            'version' => 'latest',
+            'region'  => 'us-west-2'
+        ]);
+     }
+   }
+
+   /**
     * The assignment has been deleted - cleanup
     *
     * @return bool
