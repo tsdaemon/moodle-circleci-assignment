@@ -1,12 +1,13 @@
 <?php
+
 /**
  * Capability definitions for this module.
  *
- * @package   mod_circleciassign
- * @copyright 2018 Anatolii Stehnii
+ * @package   assignsubmission_circleci
+ * @copyright 2018 tsdaemon
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$capabilities = array(
 
-// require_once($CFG->dirroot . '/mod/assign/db/access.php');
+);

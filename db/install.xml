@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/circleciassign/db" VERSION="20140724" COMMENT="XMLDB file for Moodle mod/circleciassign"
+<XMLDB PATH="mod/assign/submission/circleci/db" VERSION="20190101" COMMENT="XMLDB file for CircleCI submission plugin"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="circleciassign" COMMENT="This table saves additional information for assignmnent needed for CircleCI submission.">
+    <TABLE NAME="assignsubmission_circleci" COMMENT="This table saves additional information about student submission related to CircleCI.">
       <FIELDS>
-        <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="circleci_url" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="circleci_token" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="assignment"/>
-        <KEY NAME="assign" TYPE="foreign" FIELDS="assignment" REFTABLE="assign" REFFIELDS="id"/>
-      </KEYS>
-    </TABLE>
-    <TABLE NAME="circleciassign_submission" COMMENT="This table saves additional information about student submission related to CircleCI.">
-      <FIELDS>
-        <FIELD NAME="assign_submission" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="submission" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="circleci_job_url" TYPE="char" LENGTH="512" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="assign_submission"/>
-        <KEY NAME="assign_submission" TYPE="foreign" FIELDS="assign_submission" REFTABLE="assign_submission" REFFIELDS="id"/>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this CircleCI submission."/>
+        <KEY NAME="assignment" TYPE="foreign" FIELDS="assignment" REFTABLE="assign" REFFIELDS="id" COMMENT="The assignment instance this CircleCI submission relates to."/>
+        <KEY NAME="submission" TYPE="foreign" FIELDS="submission" REFTABLE="assign_submission" REFFIELDS="id" COMMENT="The submission this CircleCI submission relates to."/>
       </KEYS>
     </TABLE>
   </TABLES>
