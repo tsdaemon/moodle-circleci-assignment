@@ -14,8 +14,8 @@
 
  $string['aws_region'] = 'AWS region';
  $string['aws_region_help'] = 'Information required for AWS submission upload.';
- $string['aws_token'] = 'AWS token';
- $string['aws_token_help'] = 'Information required for AWS submission upload.';
+ $string['aws_secret'] = 'AWS secret';
+ $string['aws_secret_help'] = 'Information required for AWS submission upload.';
  $string['aws_key'] = 'AWS key';
  $string['aws_key_help'] = 'Information required for AWS submission upload.';
  $string['aws_bucket'] = 'AWS bucket';

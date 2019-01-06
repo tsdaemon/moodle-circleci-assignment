@@ -8,6 +8,8 @@
  */
 
  require_once($CFG->dirroot . '/mod/assign/submission/file/locallib.php');
+ require 'vendor/autoload.php';
+ use Aws\S3\S3Client;
 
  defined('MOODLE_INTERNAL') || die();
 
@@ -104,33 +106,94 @@
     * @return bool
     */
    public function save(stdClass $submission, stdClass $data) {
-     $success = parent::save($submission, $data);
-     if($success) {
-       require 'vendor/autoload.php';
+     global $USER, $DB;
 
-       global $USER, $DB;
-       $fs = get_file_storage();
+     // Get submission files
+     $fs = get_file_storage();
+     $files = $fs->get_area_files($this->assignment->get_context()->id,
+                                  'assignsubmission_file',
+                                  ASSIGNSUBMISSION_FILE_FILEAREA,
+                                  $submission->id,
+                                  'id',
+                                  false);
 
-       $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                    'assignsubmission_file',
-                                    ASSIGNSUBMISSION_FILE_FILEAREA,
-                                    $submission->id,
-                                    'id',
-                                    false);
-        if(count($files) != 1) {
-          throw new Exception('Only a single file submission is supported');
-        }
+      if(count($files) < 1) {
+        throw new Exception('At least one file should be submitted');
+      }
 
-        $filename = $files[0]->get_filename();
+      if(count($files) > 1) {
+        throw new Exception('Only a single file submission is supported');
+      }
 
-        use Aws\S3\S3Client;
+      // Store submission in S3
+      $key = get_config('assignsubmission_circleci', 'aws_key');
+      $secret = get_config('assignsubmission_circleci', 'aws_secret');
+      $s3 = new S3Client([
+          'version' => 'latest',
+          'region'  => get_config('assignsubmission_circleci', 'aws_region'),
+          'credentials' => [
+        	    'key'    => $key,
+        	    'secret' => $secret
+        	]
+      ]);
+      $file = array_shift($files);
+      $filename = $file->get_filename();
+      $key = uniqid() . $filename;
+      $bucket = get_config('assignsubmission_circleci', 'aws_bucket');
+      $s3_result = $s3->putObject([
+      	'Bucket' => get_config('assignsubmission_circleci', 'aws_bucket'),
+      	'Body' => $file->get_content(),
+        'Key' => $key
+      ]);
 
-        // Instantiate an Amazon S3 client.
-        $s3 = new S3Client([
-            'version' => 'latest',
-            'region'  => 'us-west-2'
-        ]);
-     }
+      // Send CircleCI request with stored file url
+      $data = $s3_result->toArray();
+      $file_url = $data['ObjectURL'];
+
+      $circleci_url = $this->get_config('circleci_url');
+      $circleci_token = $this->get_config('circleci_token');
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_URL, $circleci_url);
+      curl_setopt($ch, CURLOPT_USERNAME, $circleci_token);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+         'Content-Type: application/json',
+      ));
+      $student_name = fullname($USER);
+      $data = array(
+        'build_parameters' => array(
+          'CIRCLE_JOB' => 'build',
+          'FILE_URL' => $file_url,
+          'CIRCLE_USERNAME' => $student_name,
+          'CIRCLE_PR_USERNAME' => $student_name,
+        )
+      );
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+      $result = json_decode(curl_exec($ch), true);
+      $build_url = $result['build_url'];
+
+      // Store results in database
+      $circleci_submission = $this->get_circleci_submission($submission->id);
+
+      if ($circleci_submission) {
+          $circleci_submission->circleci_job_url = $build_url;
+          $circleci_submission->aws_file_url = $file_url;
+
+          $updatestatus = $DB->update_record('assignsubmission_circleci', $circleci_submission);
+          return $updatestatus;
+      } else {
+          $circleci_submission = new stdClass();
+          $circleci_submission->circleci_job_url = $build_url;
+          $circleci_submission->aws_file_url = $file_url;
+
+          $circleci_submission->submission = $submission->id;
+          $circleci_submission->assignment = $this->assignment->get_instance()->id;
+          $circleci_submission->id = $DB->insert_record('assignsubmission_circleci', $circleci_submission);
+          return $filesubmission->id > 0;
+      }
    }
 
    /**
@@ -149,5 +212,35 @@
          return true;
        }
        return $result;
+   }
+
+   /**
+    * Display the job url in the submission status table
+    *
+    * @param stdClass $submission
+    * @param bool $showviewlink Set this to true if the list of files is long
+    * @return string
+    */
+   public function view_summary(stdClass $submission, & $showviewlink) {
+       // Get results from database
+       $circleci_submission = $this->get_circleci_submission($submission->id);
+
+       $build_url = $circleci_submission->circleci_job_url;
+       $html = '<a href="'.$build_url.'">';
+       $html .= $build_url;
+       $html .= '</a>';
+
+       return $html;
+   }
+
+   /**
+    * Get CircleCI submission information from the database
+    *
+    * @param int $submissionid
+    * @return mixed
+    */
+   private function get_circleci_submission($submissionid) {
+       global $DB;
+       return $DB->get_record('assignsubmission_circleci', array('submission'=>$submissionid));
    }
  }

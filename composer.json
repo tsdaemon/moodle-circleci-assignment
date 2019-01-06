@@ -2,15 +2,7 @@
     "name": "tsdaemon/moodle-circleci-submission",
     "license": "GPL-3.0-or-later",
     "type": "project",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/moodle/moodle.git"
-        }
-    ],
     "require-dev": {
-        "phpunit/phpunit": "6.5.*",
-        "moodle/moodle": "3.5.1",
         "aws/aws-sdk-php": "*"
     }
 }
