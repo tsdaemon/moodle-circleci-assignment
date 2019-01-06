@@ -7,11 +7,13 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- require_once($CFG->dirroot . '/mod/assign/submission/file/locallib.php');
+ // require_once($CFG->dirroot . '/mod/assign/submission/file/locallib.php');
  require 'vendor/autoload.php';
  use Aws\S3\S3Client;
 
  defined('MOODLE_INTERNAL') || die();
+
+ define('ASSIGNSUBMISSION_CIRCLECI_FILEAREA', 'submission_circleci');
 
  /**
   * Library class for CircleCI submission plugin extending file plugin class
@@ -20,7 +22,7 @@
   * @copyright 2018 tsdaemon
   * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
   */
- class assign_submission_circleci extends assign_submission_file {
+ class assign_submission_circleci extends assign_submission_plugin {
 
    /**
     * Get the name of the CircleCI submission plugin
@@ -56,7 +58,6 @@
                              'assignsubmission_circleci');
        $mform->setDefault('assignsubmission_circleci_url', $circleci_url);
        $mform->disabledIf('assignsubmission_circleci_url', 'assignsubmission_circleci_enabled', 'notchecked');
-       $mform->disabledIf('assignsubmission_circleci_url', 'assignsubmission_file_enabled', 'notchecked');
 
        $name = get_string('circleci_token', 'assignsubmission_circleci');
        $mform->addElement('text', 'assignsubmission_circleci_token', $name, array('size'=>'64'));
@@ -66,9 +67,6 @@
        $mform->setDefault('assignsubmission_circleci_token', $circleci_token);
        $mform->disabledIf('assignsubmission_circleci_token',
                           'assignsubmission_circleci_enabled',
-                          'notchecked');
-       $mform->disabledIf('assignsubmission_circleci_token',
-                          'assignsubmission_file_enabled',
                           'notchecked');
    }
 
@@ -86,7 +84,23 @@
    }
 
    /**
-    * Add elements to submission form. The same as for file submission
+    * File format options
+    *
+    * @return array
+    */
+   private function get_file_options() {
+       $fileoptions = array(
+         'subdirs' => 1,
+         'maxbytes' => get_config('assignsubmission_file', 'maxbytes'),
+         'accepted_types' => '',
+         'maxfiles' => 1,
+         'return_types' => (FILE_INTERNAL | FILE_CONTROLLED_LINK)
+       );
+       return $fileoptions;
+   }
+
+   /**
+    * Add elements to submission form
     *
     * @param mixed $submission stdClass|null
     * @param MoodleQuickForm $mform
@@ -94,7 +108,22 @@
     * @return bool
     */
    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data) {
-     return parent::get_form_elements($submission, $mform, $data);
+       global $OUTPUT;
+
+       $fileoptions = $this->get_file_options();
+
+       $submissionid = $submission ? $submission->id : 0;
+
+       $data = file_prepare_standard_filemanager($data,
+                                                 'files',
+                                                 $fileoptions,
+                                                 $this->assignment->get_context(),
+                                                 'assignsubmission_circleci',
+                                                 ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                 $submissionid);
+       $mform->addElement('filemanager', 'files_filemanager', $this->get_name(), null, $fileoptions);
+
+       return true;
    }
 
    /**
@@ -108,11 +137,22 @@
    public function save(stdClass $submission, stdClass $data) {
      global $USER, $DB;
 
+     // Store uploaded files
+     $fileoptions = $this->get_file_options();
+
+     $data = file_postupdate_standard_filemanager($data,
+                                                  'files',
+                                                  $fileoptions,
+                                                  $this->assignment->get_context(),
+                                                  'assignsubmission_circleci',
+                                                  ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                  $submission->id);
+
      // Get submission files
      $fs = get_file_storage();
      $files = $fs->get_area_files($this->assignment->get_context()->id,
-                                  'assignsubmission_file',
-                                  ASSIGNSUBMISSION_FILE_FILEAREA,
+                                  'assignsubmission_circleci',
+                                  ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
                                   $submission->id,
                                   'id',
                                   false);
@@ -192,7 +232,7 @@
           $circleci_submission->submission = $submission->id;
           $circleci_submission->assignment = $this->assignment->get_instance()->id;
           $circleci_submission->id = $DB->insert_record('assignsubmission_circleci', $circleci_submission);
-          return $filesubmission->id > 0;
+          return $circleci_submission->id > 0;
       }
    }
 
@@ -202,16 +242,12 @@
     * @return bool
     */
    public function delete_instance() {
-       $result = parent::delete_instance();
-       if ($result) {
-         global $DB;
-         // Will throw exception on failure.
-         $DB->delete_records('assignsubmission_circleci',
-                             array('assignment'=>$this->assignment->get_instance()->id));
+       global $DB;
+       // Will throw exception on failure.
+       $DB->delete_records('assignsubmission_circleci',
+                           array('assignment'=>$this->assignment->get_instance()->id));
 
-         return true;
-       }
-       return $result;
+       return true;
    }
 
    /**
@@ -230,7 +266,40 @@
        $html .= $build_url;
        $html .= '</a>';
 
-       return $html;
+       $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+                                                   ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                   $submission->id);
+
+       return $html . $html_files;
+   }
+
+   /**
+    * Produce a list of files suitable for export that represent this feedback or submission
+    *
+    * @param stdClass $submission The submission
+    * @param stdClass $user The user record - unused
+    * @return array - return an array of files indexed by filename
+    */
+   public function get_files(stdClass $submission, stdClass $user) {
+       $result = array();
+       $fs = get_file_storage();
+
+       $files = $fs->get_area_files($this->assignment->get_context()->id,
+                                    'assignsubmission_circleci',
+                                    ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                    $submission->id,
+                                    'timemodified',
+                                    false);
+
+       foreach ($files as $file) {
+           // Do we return the full folder path or just the file name?
+           if (isset($submission->exportfullpath) && $submission->exportfullpath == false) {
+               $result[$file->get_filename()] = $file;
+           } else {
+               $result[$file->get_filepath().$file->get_filename()] = $file;
+           }
+       }
+       return $result;
    }
 
    /**
@@ -242,5 +311,40 @@
    private function get_circleci_submission($submissionid) {
        global $DB;
        return $DB->get_record('assignsubmission_circleci', array('submission'=>$submissionid));
+   }
+
+   /**
+    * Return true if there are no submission files
+    * @param stdClass $submission
+    */
+   public function is_empty(stdClass $submission) {
+       return $this->count_files($submission->id, ASSIGNSUBMISSION_CIRCLECI_FILEAREA) == 0;
+   }
+
+   /**
+    * Count the number of files
+    *
+    * @param int $submissionid
+    * @param string $area
+    * @return int
+    */
+   private function count_files($submissionid, $area) {
+       $fs = get_file_storage();
+       $files = $fs->get_area_files($this->assignment->get_context()->id,
+                                    'assignsubmission_circleci',
+                                    $area,
+                                    $submissionid,
+                                    'id',
+                                    false);
+
+       return count($files);
+   }
+
+   /**
+    * Get file areas returns a list of areas this plugin stores files
+    * @return array - An array of fileareas (keys) and descriptions (values)
+    */
+   public function get_file_areas() {
+       return array(ASSIGNSUBMISSION_CIRCLECI_FILEAREA=>$this->get_name());
    }
  }
