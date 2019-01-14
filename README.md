@@ -62,12 +62,15 @@ First test job will fail because it runs without `$FILE_URL` variable. This vari
 
 ## CircleCI submission
 
-You need to configure a following variable for your assingment to support CircleCI submission:
+You need to configure a following variables for your assingment to support CircleCI submission:
 
-1. CircleCI token, which you have got from the previous step.
-2. CircleCI URL. It can be composed as `https://circleci.com/api/v1.1/project/<vcs-type>/<org>/<repo>/tree/<branch>`. Read more about URL [here](https://circleci.com/docs/2.0/api-job-trigger/).
+1. CircleCI token, which you have from the previous step.
+2. CircleCI URL. It can be composed as `https://circleci.com/api/v1.1/project/<vcs-type>/<org>/<repo>/tree/<branch>`. Read more about the URL [here](https://circleci.com/docs/2.0/api-job-trigger/).
 3. CircleCI job name from your configuration.
 
-## Usage
+After this students can submit their solutions and get them tested with CircleCI.
 
-Each CircleCI submission will build a corresponding job. It will download submission file from AWS S3 and run any configation you want on this submission. A student will have a build URL in his submission, which might he can follow and check his submission status.
+# Usage
+
+* Each CircleCI submission builds a corresponding job. 
+* This build downloads a submission file *(only single file submission is allowed!)* from AWS S3 and run any test configation you want on this submission files. * A student will have a build URL in his submission, which he can follow and check his submission status.
