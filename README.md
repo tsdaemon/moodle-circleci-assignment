@@ -73,4 +73,5 @@ After this students can submit their solutions and get them tested with CircleCI
 # Usage
 
 * Each CircleCI submission builds a corresponding job. 
-* This build downloads a submission file *(only single file submission is allowed!)* from AWS S3 and run any test configation you want on this submission files. * A student will have a build URL in his submission, which he can follow and check his submission status.
+* This build downloads a submission file *(only single file submission is allowed!)* from AWS S3 and run any test configation you want on this submission files. 
+* A student will have a build URL in his submission, which he can follow and check his submission status.
