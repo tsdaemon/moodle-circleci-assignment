@@ -44,12 +44,15 @@
        if ($this->assignment->has_instance()) {
            $circleci_url = $this->get_config('circleci_url');
            $circleci_token = $this->get_config('circleci_token');
+           $circleci_job = $this->get_config('circleci_job');
        } else {
            $circleci_url = '';
-           $circleci_token = $this->get_config('assignsubmission_circleci', 'token');
+           $circleci_job = 'build';
+           $circleci_token = '';
        }
        $circleci_url = (string)$circleci_url;
        $circleci_token = (string)$circleci_token;
+       $circleci_job = (string)$circleci_job;
 
        $name = get_string('circleci_url', 'assignsubmission_circleci');
        $mform->addElement('text', 'assignsubmission_circleci_url', $name, array('size'=>'64'));
@@ -68,6 +71,16 @@
        $mform->disabledIf('assignsubmission_circleci_token',
                           'assignsubmission_circleci_enabled',
                           'notchecked');
+                          
+      $name = get_string('circleci_job', 'assignsubmission_circleci');
+      $mform->addElement('text', 'assignsubmission_circleci_job', $name, array('size'=>'64'));
+      $mform->addHelpButton('assignsubmission_circleci_job',
+                            'circleci_job',
+                            'assignsubmission_circleci');
+      $mform->setDefault('assignsubmission_circleci_job', $circleci_job);
+      $mform->disabledIf('assignsubmission_circleci_job',
+                         'assignsubmission_circleci_enabled',
+                         'notchecked');
    }
 
    /**
@@ -79,6 +92,7 @@
    public function save_settings(stdClass $data) {
        $this->set_config('circleci_token', $data->assignsubmission_circleci_token);
        $this->set_config('circleci_url', $data->assignsubmission_circleci_url);
+       $this->set_config('circleci_job', $data->assignsubmission_circleci_job);
 
        return true;
    }
@@ -192,6 +206,7 @@
 
       $circleci_url = $this->get_config('circleci_url');
       $circleci_token = $this->get_config('circleci_token');
+      $circleci_job = $this->get_config('circleci_job');
 
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -204,7 +219,7 @@
       $student_name = fullname($USER);
       $data = array(
         'build_parameters' => array(
-          'CIRCLE_JOB' => 'build',
+          'CIRCLE_JOB' => $circleci_job,
           'FILE_URL' => $file_url,
           'CIRCLE_USERNAME' => $student_name,
           'CIRCLE_PR_USERNAME' => $student_name,

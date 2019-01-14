@@ -1,0 +1,22 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: download zip and unpack
+          command: |
+            echo $CIRCLE_USERNAME
+            echo $CIRCLE_PR_USERNAME
+            wget $FILE_URL -O $HOME/target.zip
+            mkdir $HOME/target
+            unzip $HOME/target.zip -d $HOME/target
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
