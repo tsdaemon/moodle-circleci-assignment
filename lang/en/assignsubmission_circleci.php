@@ -25,6 +25,7 @@
 
 $string['circleci_url'] = 'CircleCI callback URL';
 $string['circleci_token'] = 'CircleCI API token';
+$string['circleci_job'] = 'CircleCI job name';
 
 $string['pluginname'] = 'CircleCI submissions';
 $string['privacy:metadata:filepurpose'] = 'The files loaded for this assignment submission';

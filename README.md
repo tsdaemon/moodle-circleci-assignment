@@ -5,7 +5,7 @@ Read more about CircleCI workflow [here](https://circleci.com/blog/what-is-conti
 
 # Requirements
 
-1. Publicly accesible AWS S3 bucket to store assignment files.
+1. Publicly accesible [AWS S3](https://aws.amazon.com/s3) bucket to store assignment files.
 2. CircleCI account (free is fine).
 
 # Getting started
@@ -22,7 +22,7 @@ Next run Moodle as administrator. It will propose you to install added plugins. 
 
 ## Prepare your repository
 
-To create CircleCI project you need [GitHub](https://github.com) or [BitBucket](https://bitbucket.org/) repository with test scenarious. Start from creating 
+To create CircleCI project you need a [GitHub](https://github.com) or [BitBucket](https://bitbucket.org/) repository with test scenarious. Start from creating 
 a configuration file `.circleci/config.yml` in your repository with a following content:
 
 ```
@@ -46,8 +46,28 @@ jobs:
 
 This boilerplate config defines job `build` which should be exeuted within [Docker](https://www.docker.com/) image `circleci/python:3.6.1`. This job include two steps. The first step checkouts the latest version of your repository into the Docker machine. The second step downloads submission file and unzip it into directory `$HOME/target`. 
 
+After creating this configuration, you should push it to your remote repository.
+
 This is an example of CircleCI configuration. You can extend it with more steps following CircleCI [Configuration Reference](https://circleci.com/docs/2.0/configuration-reference/).
 
 ## CircleCI project
 
-To start using CircleCI
+1. Go to [https://circleci.com/add-projects](https://circleci.com/add-projects). 
+2. Select your repository.
+3. Skip sample configuration and press "Start building".
+
+First test job will fail because it runs without `$FILE_URL` variable. This variable is sent when CircleCI submission is uploaded to Moodle.
+
+4. Go to project settings -> API permissions. Press "Create token". Now you have CircleCI token.
+
+## CircleCI submission
+
+You need to configure a following variable for your assingment to support CircleCI submission:
+
+1. CircleCI token, which you have got from the previous step.
+2. CircleCI URL. It can be composed as `https://circleci.com/api/v1.1/project/<vcs-type>/<org>/<repo>/tree/<branch>`. Read more about URL [here](https://circleci.com/docs/2.0/api-job-trigger/).
+3. CircleCI job name from your configuration.
+
+## Usage
+
+Each CircleCI submission will build a corresponding job. It will download submission file from AWS S3 and run any configation you want on this submission. A student will have a build URL in his submission, which might he can follow and check his submission status.
