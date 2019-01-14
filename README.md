@@ -12,13 +12,14 @@ Read more about CircleCI workflow [here](https://circleci.com/blog/what-is-conti
 
 ## Installation
 
-First you need to add this plugin to your Moodle installation. Clone this repository to `/mod/assign/submission/` folder:
+1. Clone this repository to `/mod/assign/submission/` folder:
 
 ```
 git clone https://github.com/tsdaemon/moodle-circleci-assignment {your_moodle_folder}/mod/assign/submission/circleci
 ```
 
-Next run Moodle as administrator. It will propose you to install added plugins. Install it and configure AWS parameters: key, secret, region, and bucket.
+2. Visit Moodle web-application as administrator, it will propose you to install added plugins. 
+3. Configure AWS parameters: key, secret, region, and bucket.
 
 ## Prepare your repository
 
@@ -44,7 +45,7 @@ jobs:
             unzip $HOME/target.zip -d $HOME/target
 ```
 
-This boilerplate config defines job `build` which should be exeuted within [Docker](https://www.docker.com/) image `circleci/python:3.6.1`. This job include two steps. The first step checkouts the latest version of your repository into the Docker machine. The second step downloads submission file and unzip it into directory `$HOME/target`. 
+This boilerplate config defines a job `build` which should be executed within [Docker](https://www.docker.com/) image `circleci/python:3.6.1`. This job includes two steps. The first step checkouts the latest version of your repository into the Docker machine. The second step downloads submission file and unzip it into a directory `$HOME/target`. 
 
 After creating this configuration, you should push it to your remote repository.
 
@@ -74,4 +75,4 @@ After this students can submit their solutions and get them tested with CircleCI
 
 * Each CircleCI submission builds a corresponding job. 
 * This build downloads a submission file *(only single file submission is allowed!)* from AWS S3 and run any test configation you want on this submission files. 
-* A student will have a build URL in his submission, which he can follow and check his submission status.
+* A student has a build URL in his submission, which he can follow and check his submission status.
