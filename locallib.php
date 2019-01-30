@@ -71,7 +71,7 @@
        $mform->disabledIf('assignsubmission_circleci_token',
                           'assignsubmission_circleci_enabled',
                           'notchecked');
-                          
+
       $name = get_string('circleci_job', 'assignsubmission_circleci');
       $mform->addElement('text', 'assignsubmission_circleci_job', $name, array('size'=>'64'));
       $mform->addHelpButton('assignsubmission_circleci_job',
@@ -276,16 +276,19 @@
        // Get results from database
        $circleci_submission = $this->get_circleci_submission($submission->id);
 
-       $build_url = $circleci_submission->circleci_job_url;
-       $html = '<a href="'.$build_url.'">';
-       $html .= $build_url;
-       $html .= '</a>';
+       if (!is_null($circleci_submission)) {
+           $build_url = $circleci_submission->circleci_job_url;
+           $html = '<a href="'.$build_url.'">';
+           $html .= $build_url;
+           $html .= '</a>';
 
-       $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
-                                                   ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
-                                                   $submission->id);
+           $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+                                                       ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                       $submission->id);
 
-       return $html . $html_files;
+           return $html . $html_files;
+       }
+       return '';
    }
 
    /**
