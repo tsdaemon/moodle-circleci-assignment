@@ -11,6 +11,7 @@
 
  $string['default'] = 'Enabled by default';
  $string['default_help'] = 'If set, this submission method will be enabled by default for all new assignments.';
+ $string['enabled_help'] = 'Enabled by default';
  $string['enabled_help'] = 'If set, this submission method will be enabled by default for all new assignments.';
 
  $string['aws_region'] = 'AWS region';
