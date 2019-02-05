@@ -276,18 +276,24 @@
        // Get results from database
        $circleci_submission = $this->get_circleci_submission($submission->id);
 
-       if (!is_null($circleci_submission)) {
+       if (is_object($circleci_submission)) {
            $build_url = $circleci_submission->circleci_job_url;
-           $html = '<a href="'.$build_url.'">';
-           $html .= $build_url;
-           $html .= '</a>';
-
-           $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
-                                                       ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
-                                                       $submission->id);
-
-           return $html . $html_files;
        }
+       elseif (is_array($circleci_submission)) {
+         $build_url = $circleci_submission['circleci_job_url'];
+       }
+       else {
+         $build_url = 'ERROR no circleci submission';
+       }
+       $html = '<a href="'.$build_url.'">';
+       $html .= $build_url;
+       $html .= '</a>';
+
+       $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+                                                   ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                   $submission->id);
+
+       return $html . $html_files;
        return '';
    }
 
