@@ -229,9 +229,20 @@
         )
       );
       curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+      $response = curl_exec($ch);
 
-      $result = json_decode(curl_exec($ch), true);
+      if (empty($response)) {
+        throw new moodle_exception('Incorrect response from CircleCI. Contact system administartor.');
+      }
+
+      $result = json_decode($response, true);
+
       $build_url = $result['build_url'];
+
+      if (empty($build_url)) {
+        file_put_contents('/tmp/dump.json', $response);
+        throw new moodle_exception('Incorrect response from CircleCI. Contact system administartor.');
+      }
 
       // Store results in database
       $circleci_submission = $this->get_circleci_submission($submission->id);
