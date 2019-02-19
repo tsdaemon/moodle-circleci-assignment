@@ -61,7 +61,6 @@
                              'assignsubmission_circleci');
        $mform->setDefault('assignsubmission_circleci_url', $circleci_url);
        $mform->disabledIf('assignsubmission_circleci_url', 'assignsubmission_circleci_enabled', 'notchecked');
-       $mform->addRule('assignsubmission_circleci_url', null, 'required', null, 'client');
 
        $name = get_string('circleci_token', 'assignsubmission_circleci');
        $mform->addElement('text', 'assignsubmission_circleci_token', $name, array('size'=>'64'));
@@ -72,7 +71,6 @@
        $mform->disabledIf('assignsubmission_circleci_token',
                           'assignsubmission_circleci_enabled',
                           'notchecked');
-      $mform->addRule('assignsubmission_circleci_token', null, 'required', null, 'client');
 
       $name = get_string('circleci_job', 'assignsubmission_circleci');
       $mform->addElement('text', 'assignsubmission_circleci_job', $name, array('size'=>'64'));
@@ -83,7 +81,6 @@
       $mform->disabledIf('assignsubmission_circleci_job',
                          'assignsubmission_circleci_enabled',
                          'notchecked');
-      $mform->addRule('assignsubmission_circleci_job', null, 'required', null, 'client');
    }
 
    /**
