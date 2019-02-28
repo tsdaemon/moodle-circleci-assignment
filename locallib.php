@@ -241,25 +241,15 @@
         throw new moodle_exception('Incorrect response from CircleCI. Contact system administartor.');
       }
 
-      // Store results in database
-      $circleci_submission = $this->get_circleci_submission($submission->id);
+      // Store results in database. Always new record
+      $circleci_submission = new stdClass();
+      $circleci_submission->circleci_job_url = $build_url;
+      $circleci_submission->aws_file_url = $file_url;
 
-      if ($circleci_submission) {
-          $circleci_submission->circleci_job_url = $build_url;
-          $circleci_submission->aws_file_url = $file_url;
-
-          $updatestatus = $DB->update_record('assignsubmission_circleci', $circleci_submission);
-          return $updatestatus;
-      } else {
-          $circleci_submission = new stdClass();
-          $circleci_submission->circleci_job_url = $build_url;
-          $circleci_submission->aws_file_url = $file_url;
-
-          $circleci_submission->submission = $submission->id;
-          $circleci_submission->assignment = $this->assignment->get_instance()->id;
-          $circleci_submission->id = $DB->insert_record('assignsubmission_circleci', $circleci_submission);
-          return $circleci_submission->id > 0;
-      }
+      $circleci_submission->submission = $submission->id;
+      $circleci_submission->assignment = $this->assignment->get_instance()->id;
+      $circleci_submission->id = $DB->insert_record('assignsubmission_circleci', $circleci_submission);
+      return $circleci_submission->id > 0;
    }
 
    /**
@@ -283,29 +273,57 @@
     * @param bool $showviewlink Set this to true if the list of files is long
     * @return string
     */
-   public function view_summary(stdClass $submission, & $showviewlink) {
-       // Get results from database
-       $circleci_submission = $this->get_circleci_submission($submission->id);
+   // public function view_summary(stdClass $submission, & $showviewlink) {
+   //     // Get only latest submission from database
+   //     $circleci_submission = $this->get_latest_circleci_submission($submission->id);
+   // 
+   //     $html = $this->circleci_summary_url_html($circleci_submission);
+   // 
+   //     $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+   //                                                 ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+   //                                                 $submission->id);
+   // 
+   //     return $html . $html_files;
+   //     return '';
+   // }
+   
+   /**
+    *  Full submission view 
+    *
+    * @param stdClass $submission
+    * @return string
+    */
+   public function view_summary(stdClass $submission) {
+     // Get all submissions from database
+     $circleci_submissions = $this->get_all_circleci_submissions($submission->id);
+     
+     $html = '';
+     foreach ($circleci_submissions as $circleci_submission) {
+       $html .= $this->circleci_summary_url_html($circleci_submission);
+     }
 
-       if (is_object($circleci_submission)) {
-           $build_url = $circleci_submission->circleci_job_url;
-       }
-       elseif (is_array($circleci_submission)) {
+     $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+                                                 ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                 $submission->id);
+
+     return $html . $html_files;
+     return '';
+   }
+   
+   private function circleci_summary_url_html(&$circleci_submission) {
+     if (is_object($circleci_submission)) {
+         $build_url = $circleci_submission->circleci_job_url;
+     }
+     elseif (is_array($circleci_submission)) {
          $build_url = $circleci_submission['circleci_job_url'];
-       }
-       else {
+     }
+     else {
          $build_url = 'ERROR no circleci submission';
-       }
-       $html = '<a href="'.$build_url.'">';
-       $html .= $build_url;
-       $html .= '</a>';
-
-       $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
-                                                   ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
-                                                   $submission->id);
-
-       return $html . $html_files;
-       return '';
+     }
+     $html = '<a href="'.$build_url.'">';
+     $html .= $build_url;
+     $html .= '</a></br>';
+     return $html;
    }
 
    /**
@@ -338,14 +356,26 @@
    }
 
    /**
-    * Get CircleCI submission information from the database
+    * Get the latest CircleCI submission from the database
     *
     * @param int $submissionid
     * @return mixed
     */
-   private function get_circleci_submission($submissionid) {
+   private function get_latest_circleci_submission($submissionid) {
        global $DB;
-       return $DB->get_record('assignsubmission_circleci', array('submission'=>$submissionid));
+       $sql = 'SELECT * FROM {assignsubmission_circleci} WHERE submission = ? ORDER BY id DESC LIMIT 1';
+       return $DB->get_record_sql($sql, array($submissionid));
+   }
+   
+   /**
+    * Get all CircleCI submissions from the database
+    *
+    * @param int $submissionid
+    * @return mixed
+    */
+   private function get_all_circleci_submissions($submissionid) {
+       global $DB;
+       return $DB->get_records('assignsubmission_circleci', array('submission'=>$submissionid));
    }
 
    /**
