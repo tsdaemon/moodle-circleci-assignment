@@ -273,19 +273,20 @@
     * @param bool $showviewlink Set this to true if the list of files is long
     * @return string
     */
-   // public function view_summary(stdClass $submission, & $showviewlink) {
-   //     // Get only latest submission from database
-   //     $circleci_submission = $this->get_latest_circleci_submission($submission->id);
-   // 
-   //     $html = $this->circleci_summary_url_html($circleci_submission);
-   // 
-   //     $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
-   //                                                 ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
-   //                                                 $submission->id);
-   // 
-   //     return $html . $html_files;
-   //     return '';
-   // }
+   public function view_summary(stdClass $submission, &$showviewlink) {
+       // Get only latest submission from database
+       $circleci_submission = $this->get_latest_circleci_submission($submission->id);
+   
+       $html = $this->circleci_summary_url_html($circleci_submission);
+   
+       $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
+                                                   ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
+                                                   $submission->id);
+       $showviewlink = true;        
+                                          
+       return $html . $html_files;
+       return '';
+   }
    
    /**
     *  Full submission view 
@@ -293,7 +294,7 @@
     * @param stdClass $submission
     * @return string
     */
-   public function view_summary(stdClass $submission) {
+   public function view(stdClass $submission) {
      // Get all submissions from database
      $circleci_submissions = $this->get_all_circleci_submissions($submission->id);
      
@@ -305,9 +306,8 @@
      $html_files = $this->assignment->render_area_files('assignsubmission_circleci',
                                                  ASSIGNSUBMISSION_CIRCLECI_FILEAREA,
                                                  $submission->id);
-
+                                                 
      return $html . $html_files;
-     return '';
    }
    
    private function circleci_summary_url_html(&$circleci_submission) {
